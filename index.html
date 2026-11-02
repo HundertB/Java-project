@@ -1,1 +1,438 @@
-"# Java-project" 
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-zinc-950 text-zinc-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveHire | Vehicle Renting Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- FontAwesome Fallback Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#09090B',
+                            dark: '#18181B',
+                            card: '#27272A',
+                            border: '#3F3F46',
+                            muted: '#A1A1AA',
+                            blue: '#2563EB',
+                            blueHover: '#1D4ED8',
+                            blueLight: '#EFF6FF',
+                            blueBorder: '#3B82F6',
+                            emerald: '#10B981',
+                            amber: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full flex flex-col overflow-hidden bg-zinc-950 text-zinc-100 antialiased selection:bg-blue-600 selection:text-white pb-16 md:pb-0">
+
+    <!-- TOP HEADER -->
+    <header class="h-16 border-b border-zinc-800/80 bg-zinc-900/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-600/20">
+                DH
+            </div>
+            <div>
+                <span class="font-extrabold text-lg tracking-tight text-white">DRIVE<span class="text-blue-500">HIRE</span></span>
+                <span class="hidden sm:inline-block ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 uppercase tracking-wider">Self-Drive & Fleet Rental</span>
+            </div>
+        </div>
+
+        <!-- Metric Badges & Profile Trigger -->
+        <div class="flex items-center gap-4">
+            <div class="hidden lg:flex items-center gap-6 text-xs text-zinc-400 mr-4 border-r border-zinc-800 pr-6">
+                <div>Total Fleet: <span class="font-bold text-white ml-1" id="stat-total-fleet">8</span></div>
+                <div>Available: <span class="font-bold text-emerald-400 ml-1" id="stat-available">6</span></div>
+                <div>Active Rentals: <span class="font-bold text-blue-400 ml-1" id="stat-rentals">2</span></div>
+                <div>Revenue: <span class="font-bold text-white ml-1" id="stat-revenue">₹14,500</span></div>
+            </div>
+
+            <!-- Customer Profile Auto-Saved Status Badge -->
+            <button onclick="toggleProfileModal()" class="flex items-center gap-2.5 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/60 px-3 py-1.5 rounded-xl transition text-xs font-medium group">
+                <div class="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-bold text-xs group-hover:bg-blue-600 group-hover:text-white transition">
+                    <i class="ph-bold ph-user"></i>
+                </div>
+                <div class="text-left hidden sm:block">
+                    <p class="text-xs font-semibold leading-none text-white" id="header-user-name">Alex Morgan</p>
+                    <p class="text-[10px] text-emerald-400 leading-none mt-0.5 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Auto-Saved Profile
+                    </p>
+                </div>
+                <i class="ph-bold ph-caret-down text-zinc-400 text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WRAPPER (Left Sidebar + Dynamic Content) -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- LEFT SIDEBAR NAVIGATION (DESKTOP) -->
+        <aside class="w-64 border-r border-zinc-800/80 bg-zinc-900/60 hidden md:flex flex-col justify-between p-3 shrink-0">
+            <div class="space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Rental Hub & Inventory</div>
+                <nav class="space-y-1">
+                    <button onclick="switchTab('rent')" id="side-nav-rent" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition text-white bg-blue-600 shadow-lg shadow-blue-600/20">
+                        <i class="ph-bold ph-key text-lg"></i> Vehicle Renting
+                    </button>
+                    <button onclick="switchTab('fleet')" id="side-nav-fleet" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition text-zinc-400 hover:text-white hover:bg-zinc-800/60">
+                        <i class="ph-bold ph-car text-lg"></i> Fleet Inventory
+                    </button>
+                    <button onclick="switchTab('partners')" id="side-nav-partners" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition text-zinc-400 hover:text-white hover:bg-zinc-800/60">
+                        <i class="ph-bold ph-users text-lg"></i> Fleet Partners
+                    </button>
+                    <button onclick="switchTab('activity')" id="side-nav-activity" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition text-zinc-400 hover:text-white hover:bg-zinc-800/60">
+                        <i class="ph-bold ph-clock-counter-clockwise text-lg"></i> Rental History Log
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Auto-save info box -->
+            <div class="p-3 bg-zinc-950/80 rounded-xl border border-zinc-800/80 text-xs text-zinc-400">
+                <div class="flex items-center gap-2 text-white font-medium mb-1">
+                    <i class="ph-bold ph-floppy-disk text-blue-400"></i> Local Auto-Save Active
+                </div>
+                Renter details sync instantly across all checkout forms.
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW AREA -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-zinc-950">
+
+            <!-- Toast Container -->
+            <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+            <!-- SECTION 1: VEHICLE RENTING MODULE (Strictly Renting by Hour/Day) -->
+            <section id="section-rent" class="tab-section space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Vehicle Renting Hub</h1>
+                        <p class="text-zinc-400 text-sm">Rent self-drive cars, bikes, and delivery vans by the hour or multi-day packages.</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-zinc-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Instant Booking Engine Active
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Rental Checkout Form -->
+                    <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800/90 rounded-2xl p-5 space-y-5 shadow-xl">
+                        <div class="space-y-3">
+                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Select Rental Vehicle</label>
+                            <select id="rent-vehicle-select" onchange="updateRentalCalculation()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <!-- Rental Duration Type Switch -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="setRentalMode('daily')" id="mode-daily" class="py-2 rounded-xl border border-blue-500 bg-blue-600/10 text-white font-semibold text-xs transition">Daily Rate</button>
+                            <button type="button" onclick="setRentalMode('hourly')" id="mode-hourly" class="py-2 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 font-semibold text-xs transition">Hourly Rate</button>
+                        </div>
+
+                        <!-- Date or Hour inputs -->
+                        <div id="container-dates" class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-400 mb-1">Start Date</label>
+                                <input type="date" id="rent-start-date" onchange="updateRentalCalculation()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-400 mb-1">End Date</label>
+                                <input type="date" id="rent-end-date" onchange="updateRentalCalculation()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div id="container-hours" class="hidden">
+                            <label class="block text-xs font-semibold text-zinc-400 mb-1">Rental Duration (Hours)</label>
+                            <input type="number" id="rent-hours-count" value="6" min="1" max="24" oninput="updateRentalCalculation()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-400 mb-1">Promo Code</label>
+                            <input type="text" id="rent-promo" placeholder="RENT10" oninput="updateRentalCalculation()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white uppercase font-mono focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <!-- Auto-filled Renter Profile -->
+                        <div class="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3 text-xs space-y-1">
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Renter Profile (Auto-filled):</span>
+                                <button onclick="toggleProfileModal()" class="text-blue-400 hover:underline">Edit Profile</button>
+                            </div>
+                            <p class="font-semibold text-white" id="rent-autofill-name">Alex Morgan (+91 98765-43210)</p>
+                        </div>
+
+                        <!-- Rental Cost Breakdown -->
+                        <div class="p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2 text-xs">
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Base Tariff Rate:</span>
+                                <span class="font-mono text-white" id="rent-base-rate">₹2,500 / day</span>
+                            </div>
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Duration / Days:</span>
+                                <span class="font-mono text-white" id="rent-duration-label">2 Days</span>
+                            </div>
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Promo Discount:</span>
+                                <span class="font-mono text-emerald-400" id="rent-discount">₹0.00</span>
+                            </div>
+                            <div class="border-t border-zinc-800 pt-2 flex justify-between items-center text-sm font-bold text-white">
+                                <span>Total Rental Fee:</span>
+                                <span class="text-blue-400 text-lg font-mono" id="rent-total-fee">₹5,000</span>
+                            </div>
+                        </div>
+
+                        <button onclick="confirmRentalCheckout()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-key"></i> Confirm Vehicle Rental Booking
+                        </button>
+                    </div>
+
+                    <!-- Available Inventory Cards for Renting -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Available Rental Inventory</h2>
+                            <span class="text-xs text-zinc-400 font-mono" id="inventory-count-label">6 vehicles available</span>
+                        </div>
+                        <div id="rental-inventory-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Dynamic Cards -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: FLEET INVENTORY MANAGEMENT -->
+            <section id="section-fleet" class="tab-section hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Fleet Inventory Registry</h1>
+                        <p class="text-zinc-400 text-sm">Add, inspect status, and manage cars, bikes, and delivery vans available for rent.</p>
+                    </div>
+                    <button onclick="toggleModal('modal-add-vehicle', true)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 w-fit shadow-lg shadow-blue-600/20">
+                        <i class="ph-bold ph-plus"></i> Add Rental Vehicle
+                    </button>
+                </div>
+
+                <!-- Vehicles Table -->
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-zinc-950 text-zinc-400 uppercase font-semibold border-b border-zinc-800">
+                                <tr>
+                                    <th class="p-4">Vehicle Model</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Registration No.</th>
+                                    <th class="p-4">Daily Tariff (₹)</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fleet-table-body" class="divide-y divide-zinc-800 text-zinc-300">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: FLEET PARTNERS -->
+            <section id="section-partners" class="tab-section hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Fleet Partners & Operators</h1>
+                        <p class="text-zinc-400 text-sm">Manage vehicle owners, operators, and payout earnings.</p>
+                    </div>
+                    <button onclick="toggleModal('modal-add-partner', true)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                        <i class="ph-bold ph-user-plus"></i> Add Fleet Partner
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="partners-grid">
+                    <!-- Dynamic Partner Cards -->
+                </div>
+            </section>
+
+            <!-- SECTION 4: RENTAL HISTORY LOG -->
+            <section id="section-activity" class="tab-section hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Rental History & Activity Log</h1>
+                        <p class="text-zinc-400 text-sm">Comprehensive record of all active and completed vehicle rentals.</p>
+                    </div>
+                    <button onclick="exportActivityCSV()" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 w-fit">
+                        <i class="ph-bold ph-download-simple"></i> Export CSV Report
+                    </button>
+                </div>
+
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-zinc-950 text-zinc-400 uppercase font-semibold border-b border-zinc-800">
+                                <tr>
+                                    <th class="p-4">Rental ID</th>
+                                    <th class="p-4">Vehicle Rented</th>
+                                    <th class="p-4">Renter Name</th>
+                                    <th class="p-4">Duration / Package</th>
+                                    <th class="p-4">Total Cost (₹)</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activity-table-body" class="divide-y divide-zinc-800 text-zinc-300">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-800 z-40 px-2 py-1 flex justify-around items-center">
+        <button onclick="switchTab('rent')" id="mob-nav-rent" class="flex flex-col items-center py-1 px-3 text-blue-500">
+            <i class="ph-bold ph-key text-lg"></i>
+            <span class="text-[10px] font-semibold mt-0.5">Renting</span>
+        </button>
+        <button onclick="switchTab('fleet')" id="mob-nav-fleet" class="flex flex-col items-center py-1 px-3 text-zinc-400">
+            <i class="ph-bold ph-car text-lg"></i>
+            <span class="text-[10px] font-semibold mt-0.5">Fleet</span>
+        </button>
+        <button onclick="switchTab('partners')" id="mob-nav-partners" class="flex flex-col items-center py-1 px-3 text-zinc-400">
+            <i class="ph-bold ph-users text-lg"></i>
+            <span class="text-[10px] font-semibold mt-0.5">Partners</span>
+        </button>
+        <button onclick="switchTab('activity')" id="mob-nav-activity" class="flex flex-col items-center py-1 px-3 text-zinc-400">
+            <i class="ph-bold ph-clock-counter-clockwise text-lg"></i>
+            <span class="text-[10px] font-semibold mt-0.5">History</span>
+        </button>
+    </nav>
+
+    <!-- MODAL: AUTO-SAVED CUSTOMER PROFILE -->
+    <div id="modal-profile" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="ph-bold ph-user-circle text-blue-500"></i> Renter Profile (Auto-Saved)
+                </h3>
+                <button onclick="toggleProfileModal()" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+
+            <p class="text-xs text-zinc-400">All fields automatically save to <code class="text-blue-400 font-mono">localStorage</code> as you type, filling every rental checkout instantly.</p>
+
+            <form onsubmit="handleSaveProfile(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Full Name</label>
+                    <input type="text" id="prof-name" oninput="autoSaveProfileFields()" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Phone Number (+91)</label>
+                    <input type="tel" id="prof-phone" oninput="autoSaveProfileFields()" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Email Address</label>
+                    <input type="email" id="prof-email" oninput="autoSaveProfileFields()" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Preferred Payment Mode</label>
+                    <select id="prof-payment" onchange="autoSaveProfileFields()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="UPI (PhonePe / GPay)">UPI (PhonePe / GPay)</option>
+                        <option value="DrivePay Wallet">DrivePay Wallet (₹4,850.00)</option>
+                        <option value="Credit Card / EMI">Credit Card / Debit Card</option>
+                    </select>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="toggleProfileModal()" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">Close</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">Saved</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD RENTAL VEHICLE -->
+    <div id="modal-add-vehicle" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-base font-bold text-white">Add Vehicle to Rental Inventory</h3>
+                <button onclick="toggleModal('modal-add-vehicle', false)" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleAddVehicle(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Vehicle Model Name</label>
+                    <input type="text" id="new-veh-model" required placeholder="e.g. Mahindra Thar 4x4" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 mb-1 font-semibold">Category</label>
+                        <select id="new-veh-cat" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="Self-Drive Car">Self-Drive Car</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Delivery Van">Delivery Van</option>
+                            <option value="Motorcycle">Motorcycle</option>
+                            <option value="EV Scooter">EV Scooter</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 mb-1 font-semibold">Registration No.</label>
+                        <input type="text" id="new-veh-reg" required placeholder="KA-01-HH-9921" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono uppercase focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Daily Tariff Rate (₹)</label>
+                    <input type="number" id="new-veh-tariff" required min="300" value="2500" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="toggleModal('modal-add-vehicle', false)" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">Save Vehicle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD FLEET PARTNER -->
+    <div id="modal-add-partner" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-base font-bold text-white">Register Fleet Partner</h3>
+                <button onclick="toggleModal('modal-add-partner', false)" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleAddPartner(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-semibold">Partner / Company Name</label>
+                    <input type="text" id="new-part-name" required placeholder="e.g. Apex Fleet Holdings" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 mb-1 font-semibold">Vehicles Listed</label>
+                        <input type="number" id="new-part-vehicles" min="1" value="3" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 mb-1 font-semibold">Rating</label>
+                        <input type="number" id="new-part-rating" step="0.1" min="4.0" max="5.0" value="4.9" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="toggleModal('modal-add-partner', false)" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">Save Partner</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- External JavaScript File -->
+    <script src="script.js"></script>
+</body>
+</html>
